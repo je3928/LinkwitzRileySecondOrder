@@ -1,9 +1,11 @@
 //
 //  LinkwitzRiley2ndOrder.cpp
 // 
-//  Author: Jordan Evans 
+//  Author: Jordan Evans
 //  22.03.2022
 //  2nd Order Linkwitz-Riley filters for use in cross over networks. Adapted from earlevel engineerings biquad object.
+
+// Update 15.12.2022: filter structure changed to direct form 2 transposed 
 
 // Notes: type 0 = LPF, type 1 = HPF
 
@@ -17,12 +19,12 @@ LinkwitzRiley2ndOrder::LinkwitzRiley2ndOrder() {
     a1 = a2 = b1 = b2 = 0.0;
     Fc = 0.50;
     Fs = 0.0000000;
-    z1 = z2 = 0.0;
+    s1 = s2 = s1minus1 = s2minus1 = 0.0;
 }
 
 LinkwitzRiley2ndOrder::LinkwitzRiley2ndOrder(int type, double Fc, double Q) {
     setFilter(type, Fc, Q);
-    z1 = z2 = 0.0;
+    s1 = s2 = s1minus1 = s2minus1 = 0.0;
 }
 
 LinkwitzRiley2ndOrder::~LinkwitzRiley2ndOrder() {
@@ -40,6 +42,9 @@ void LinkwitzRiley2ndOrder::setFc(double Fc) {
 }
 
 void LinkwitzRiley2ndOrder::setFilter(int type, double Fc, double Fs) {
+
+    s1 = s2 = s1minus1 = s2minus1 = 0.0;
+
     this->type = type;
     this->Fs = Fs;
     this->Fc = Fc;
@@ -47,9 +52,6 @@ void LinkwitzRiley2ndOrder::setFilter(int type, double Fc, double Fs) {
 }
 
 void LinkwitzRiley2ndOrder::calcFilter(void) {
- /*   double norm;
-    double V = pow(10, fabs(peakGain) / 20.0);
-    double K = tan(3.1415926535 * Fc);*/
 
     double theta = pi * Fc / Fs;
     double omega = pi * Fc;
